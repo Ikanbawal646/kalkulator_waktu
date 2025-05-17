@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Konversi & Selisih Waktu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      width: 90%;
+      max-width: 480px;
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 7px;
+      text-align: left;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    input, select {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+    button {
+      background: linear-gradient(45deg, #ff6a00, #ee0979);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+      margin-top: 15px;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #jamDigital {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffecb3;
+    }
+    #tanggalDigital {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #f1c40f;
+    }
+    .hasil {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      white-space: pre-line;
+      color: #ffecb3;
+      margin-top: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="jamDigital">--:--:--</div>
+    <div id="tanggalDigital">Memuat tanggal...</div>
+
+    <h2>Konversi Waktu</h2>
+    <label>Nilai Waktu</label>
+    <input type="number" id="nilai" placeholder="Contoh: 1.5" min="0" step="any" />
+    <label>Satuan</label>
+    <select id="satuan">
+      <option value="tahun">Tahun</option>
+      <option value="bulan">Bulan</option>
+      <option value="minggu">Minggu</option>
+      <option value="hari">Hari</option>
+      <option value="jam">Jam</option>
+      <option value="menit">Menit</option>
+      <option value="detik">Detik</option>
+    </select>
+    <button onclick="konversiWaktu()">Konversi</button>
+    <div class="hasil" id="hasilKonversi">-</div>
+
+    <h2>Selisih Waktu</h2>
+    <label>Dari Waktu</label>
+    <input type="datetime-local" id="waktuAwal" />
+    <label>Sampai Waktu</label>
+    <input type="datetime-local" id="waktuAkhir" />
+    <button onclick="hitungSelisih()">Hitung Selisih</button>
+    <div class="hasil" id="hasilSelisih">-</div>
+  </div>
+
+  <script>
+    function updateJam() {
+      const now = new Date();
+      const jam = String(now.getHours()).padStart(2, '0');
+      const menit = String(now.getMinutes()).padStart(2, '0');
+      const detik = String(now.getSeconds()).padStart(2, '0');
+      const hari = now.getDate().toString().padStart(2, '0');
+      const bulan = (now.getMonth() + 1).toString().padStart(2, '0');
+      const tahun = now.getFullYear();
+      document.getElementById('jamDigital').innerText = `${jam}:${menit}:${detik}`;
+      document.getElementById('tanggalDigital').innerText = `Tanggal: ${hari}-${bulan}-${tahun}`;
+    }
+    setInterval(updateJam, 1000);
+    updateJam();
+
+    function fmt(n) {
+      return Number.isInteger(n) ? n : n.toFixed(4);
+    }
+
+    function konversiWaktu() {
+      const nilai = parseFloat(document.getElementById('nilai').value);
+      const satuan = document.getElementById('satuan').value;
+      const out = document.getElementById('hasilKonversi');
+
+      if (isNaN(nilai) || nilai < 0) {
+        out.innerText = "Masukkan angka valid.";
+        return;
+      }
+
+      let detikTotal = {
+        tahun: nilai * 365.25 * 24 * 3600,
+        bulan: nilai * (365.25 / 12) * 24 * 3600,
+        minggu: nilai * 7 * 24 * 3600,
+        hari: nilai * 24 * 3600,
+        jam: nilai * 3600,
+        menit: nilai * 60,
+        detik: nilai
+      }[satuan];
+
+      const hasil = {
+        tahun: detikTotal / (365.25 * 24 * 3600),
+        bulan: detikTotal / ((365.25 / 12) * 24 * 3600),
+        minggu: detikTotal / (7 * 24 * 3600),
+        hari: detikTotal / (24 * 3600),
+        jam: detikTotal / 3600,
+        menit: detikTotal / 60,
+        detik: detikTotal
+      };
+
+      out.innerText =
+        `${fmt(nilai)} ${satuan} =\n` +
+        `${fmt(hasil.tahun)} tahun\n` +
+        `${fmt(hasil.bulan)} bulan\n` +
+        `${fmt(hasil.minggu)} minggu\n` +
+        `${fmt(hasil.hari)} hari\n` +
+        `${fmt(hasil.jam)} jam\n` +
+        `${fmt(hasil.menit)} menit\n` +
+        `${fmt(hasil.detik)} detik`;
+    }
+
+    function hitungSelisih() {
+      const awal = new Date(document.getElementById('waktuAwal').value);
+      const akhir = new Date(document.getElementById('waktuAkhir').value);
+      const out = document.getElementById('hasilSelisih');
+
+      if (!awal || !akhir || isNaN(awal) || isNaN(akhir)) {
+        out.innerText = "Masukkan waktu awal dan akhir yang valid.";
+        return;
+      }
+
+      let selisihDetik = Math.abs((akhir - awal) / 1000);
+      let sisa = selisihDetik;
+
+      const tahun = Math.floor(sisa / (365.25 * 24 * 3600));
+      sisa -= tahun * 365.25 * 24 * 3600;
+
+      const bulan = Math.floor(sisa / ((365.25 / 12) * 24 * 3600));
+      sisa -= bulan * ((365.25 / 12) * 24 * 3600);
+
+      const minggu = Math.floor(sisa / (7 * 24 * 3600));
+      sisa -= minggu * 7 * 24 * 3600;
+
+      const hari = Math.floor(sisa / (24 * 3600));
+      sisa -= hari * 24 * 3600;
+
+      const jam = Math.floor(sisa / 3600);
+      sisa -= jam * 3600;
+
+      const menit = Math.floor(sisa / 60);
+      const detik = Math.floor(sisa % 60);
+
+      const hasilDecimal = {
+        tahun: selisihDetik / (365.25 * 24 * 3600),
+        bulan: selisihDetik / ((365.25 / 12) * 24 * 3600),
+        minggu: selisihDetik / (7 * 24 * 3600),
+        hari: selisihDetik / (24 * 3600),
+        jam: selisihDetik / 3600,
+        menit: selisihDetik / 60,
+        detik: selisihDetik
+      };
+
+      out.innerText =
+        `Selisih waktu:\n` +
+        `${fmt(hasilDecimal.tahun)} tahun\n` +
+        `${fmt(hasilDecimal.bulan)} bulan\n` +
+        `${fmt(hasilDecimal.minggu)} minggu\n` +
+        `${fmt(hasilDecimal.hari)} hari\n` +
+        `${fmt(hasilDecimal.jam)} jam\n` +
+        `${fmt(hasilDecimal.menit)} menit\n` +
+        `${fmt(hasilDecimal.detik)} detik\n\n` +
+        `Format terurai:\n` +
+        `${tahun} tahun, ${bulan} bulan, ${minggu} minggu, ${hari} hari,\n` +
+        `${jam} jam, ${menit} menit, ${detik} detik`;
+    }
+  </script>
+</body>
+</html>
